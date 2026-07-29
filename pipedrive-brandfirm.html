@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipedrive Invoer — Brandfirm</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f5f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+      width: 100%;
+      max-width: 600px;
+      overflow: hidden;
+    }
+
+    .header {
+      background: #1a1a2e;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo {
+      width: 40px; height: 40px;
+      background: #e84c3d;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff; font-size: 18px; flex-shrink: 0;
+    }
+    .header-title { color: #fff; font-size: 18px; font-weight: 600; }
+    .header-sub { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 2px; }
+
+    .body { padding: 32px; }
+
+    .field { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111827;
+      background: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #e84c3d;
+      box-shadow: 0 0 0 3px rgba(232,76,61,0.10);
+    }
+    textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+    .divider { border: none; border-top: 1.5px solid #f3f4f6; margin: 22px 0; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .badge-auto { background: #ecfdf5; color: #166534; }
+
+    .owner-box {
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .owner-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+    }
+    .owner-name { font-size: 14px; font-weight: 600; color: #111827; }
+    .owner-role { font-size: 12px; color: #6b7280; }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #e84c3d;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.01em;
+    }
+    .btn:hover { background: #c0392b; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { background: #d1d5db; cursor: not-allowed; transform: none; }
+
+    .status {
+      margin-top: 20px;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 14px;
+      display: none;
+      line-height: 1.6;
+    }
+    .status.loading { display: block; background: #f0f9ff; color: #0369a1; border: 1.5px solid #bae6fd; }
+    .status.success { display: block; background: #f0fdf4; color: #166534; border: 1.5px solid #bbf7d0; }
+    .status.error   { display: block; background: #fef2f2; color: #991b1b; border: 1.5px solid #fecaca; }
+    .status ul { margin-top: 8px; padding-left: 18px; }
+    .status li { margin-bottom: 3px; }
+    a.deal-link { color: #166534; font-weight: 700; text-decoration: underline; }
+
+    .spinner { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="header-logo">B</div>
+    <div>
+      <div class="header-title">Pipedrive Invoer</div>
+      <div class="header-sub">Salesfusion → Brandfirm &amp; Brandfirm Linkbuilding</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- OPDRACHTGEVER -->
+    <div class="section-label">Opdrachtgever</div>
+    <div class="field">
+      <label>Voor wie?</label>
+      <select id="opdrachtgever" onchange="updateOwner()">
+        <option value="brandfirm">Brandfirm</option>
+        <option value="linkbuilding">Brandfirm Linkbuilding</option>
+      </select>
+    </div>
+
+    <!-- EIGENAAR -->
+    <div class="field" id="ownerSelectField">
+      <label>Eigenaar deal &amp; kennismaking</label>
+      <select id="ownerSelect" onchange="renderOwnerBox()">
+        <option value="11956521|Joren Lammertink|#6366f1">Joren Lammertink</option>
+        <option value="11549634|Remco van der Boon|#0ea5e9">Remco van der Boon</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="owner-box" id="ownerBox">
+        <div class="owner-avatar" id="ownerAvatar" style="background:#6366f1">JL</div>
+        <div>
+          <div class="owner-name" id="ownerName">Joren Lammertink</div>
+          <div class="owner-role">Eigenaar van deal &amp; kennismaking-activiteit</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- CONTACTPERSOON -->
+    <div class="section-label">Contactpersoon</div>
+
+    <div class="row">
+      <div class="field">
+        <label>Voornaam *</label>
+        <input type="text" id="voornaam" placeholder="Jan" />
+      </div>
+      <div class="field">
+        <label>Achternaam</label>
+        <input type="text" id="achternaam" placeholder="de Vries" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Bedrijfsnaam *</label>
+      <input type="text" id="bedrijf" placeholder="Bedrijf B.V." />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Telefoonnummer</label>
+        <input type="tel" id="telefoon" placeholder="+31 6 12345678" />
+      </div>
+      <div class="field">
+        <label>E-mailadres</label>
+        <input type="email" id="email" placeholder="jan@bedrijf.nl" />
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- KENNISMAKING -->
+    <div class="section-label">Kennismaking inplannen</div>
+
+    <div class="row3">
+      <div class="field">
+        <label>Datum *</label>
+        <input type="date" id="datum" />
+      </div>
+      <div class="field">
+        <label>Tijdstip *</label>
+        <input type="time" id="tijd" value="10:00" />
+      </div>
+      <div class="field">
+        <label>Duur (min)</label>
+        <input type="number" id="duur" value="60" min="15" max="480" />
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- GESPREKSVERSLAG -->
+    <div class="section-label">Gespreksverslag</div>
+    <div class="field">
+      <textarea id="verslag" placeholder="Beschrijf het gesprek: wie was het, wat werd besproken, interesse, bijzonderheden..."></textarea>
+    </div>
+
+    <!-- AUTO VELDEN INFO -->
+    <div style="background:#f9fafb;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#6b7280;margin-bottom:20px;line-height:1.6;">
+      🤖 <strong>Automatisch ingesteld:</strong>
+      Pijplijn: <strong>Brandfirm Sales</strong> &nbsp;·&nbsp;
+      Fase: <strong>Kennismaking</strong> &nbsp;·&nbsp;
+      Bron: <strong>SalesFusion</strong>
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="submit()">Invoeren in Pipedrive →</button>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+  // ── Pipedrive config ──────────────────────────────────────────────
+  const API_TOKEN   = '98ff4d27622d0d34ed4f14a50450eb10c7d71286';
+  const BASE        = 'https://api.pipedrive.com/v1';
+  const PIPELINE_ID = 1;          // Brandfirm Sales
+  const STAGE_ID    = 1;          // Kennismaking
+  const ACTIVITY_TYPE = 'kennismaking_';
+  const BRON_FIELD  = 'ec85e1c73f6eedf36a8f76bd36093e02ec983ca3';
+  const BRON_VALUE  = 157;        // SalesFusion
+
+  const OWNERS = {
+    brandfirm: [
+      { id: 11956521, name: 'Joren Lammertink',  initials: 'JL', color: '#6366f1' },
+      { id: 11549634, name: 'Remco van der Boon', initials: 'RB', color: '#0ea5e9' },
+    ],
+    linkbuilding: [
+      { id: 32014550, name: 'Bas Doodeman', initials: 'BD', color: '#10b981' },
+    ],
+  };
+
+  // ── UI helpers ────────────────────────────────────────────────────
+  function updateOwner() {
+    const client = document.getElementById('opdrachtgever').value;
+    const owners = OWNERS[client];
+    const sel = document.getElementById('ownerSelect');
+    const field = document.getElementById('ownerSelectField');
+
+    sel.innerHTML = owners.map(o =>
+      `<option value="${o.id}|${o.name}|${o.color}">${o.name}</option>`
+    ).join('');
+
+    field.style.display = owners.length > 1 ? 'block' : 'none';
+    renderOwnerBox();
+  }
+
+  function renderOwnerBox() {
+    const val = document.getElementById('ownerSelect').value.split('|');
+    const [id, name, color] = val;
+    const initials = name.split(' ').map(w => w[0]).filter((_,i,a) => i===0||i===a.length-1).join('').toUpperCase();
+    document.getElementById('ownerAvatar').style.background = color;
+    document.getElementById('ownerAvatar').textContent = initials;
+    document.getElementById('ownerName').textContent = name;
+  }
+
+  function getOwnerId() {
+    return parseInt(document.getElementById('ownerSelect').value.split('|')[0]);
+  }
+
+  function setStatus(type, html) {
+    const el = document.getElementById('status');
+    el.className = 'status ' + type;
+    el.innerHTML = html;
+  }
+
+  function formatDuration(minutes) {
+    return String(Math.floor(minutes/60)).padStart(2,'0') + ':' + String(minutes%60).padStart(2,'0');
+  }
+
+  // ── API ───────────────────────────────────────────────────────────
+  async function apiGet(path) {
+    const sep = path.includes('?') ? '&' : '?';
+    const r = await fetch(BASE + path + sep + 'api_token=' + API_TOKEN);
+    return r.json();
+  }
+
+  async function apiPost(path, body) {
+    const r = await fetch(BASE + path + '?api_token=' + API_TOKEN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return r.json();
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────
+  async function submit() {
+    const voornaam    = document.getElementById('voornaam').value.trim();
+    const achternaam  = document.getElementById('achternaam').value.trim();
+    const bedrijf     = document.getElementById('bedrijf').value.trim();
+    const telefoon    = document.getElementById('telefoon').value.trim();
+    const email       = document.getElementById('email').value.trim();
+    const datum       = document.getElementById('datum').value;
+    const tijd        = document.getElementById('tijd').value;
+    const duur        = parseInt(document.getElementById('duur').value) || 60;
+    const verslag     = document.getElementById('verslag').value.trim();
+    const opdrachtgever = document.getElementById('opdrachtgever').options[document.getElementById('opdrachtgever').selectedIndex].text;
+    const ownerId     = getOwnerId();
+    const ownerName   = document.getElementById('ownerName').textContent;
+
+    if (!voornaam || !bedrijf || !datum || !verslag) {
+      setStatus('error', '⚠️ Vul minimaal voornaam, bedrijfsnaam, datum en gespreksverslag in.');
+      return;
+    }
+
+    const volledigeNaam = [voornaam, achternaam].filter(Boolean).join(' ');
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+
+    try {
+      // 1. Organisatie
+      setStatus('loading', '<span class="spinner">⏳</span> Organisatie opzoeken...');
+      let orgId = null;
+      const orgSearch = await apiGet('/organizations/search?term=' + encodeURIComponent(bedrijf) + '&exact_match=false&limit=5');
+      if (orgSearch.data?.items?.length) {
+        orgId = orgSearch.data.items[0].item.id;
+      } else {
+        const orgCreate = await apiPost('/organizations', { name: bedrijf, owner_id: ownerId });
+        orgId = orgCreate.data.id;
+      }
+
+      // 2. Persoon
+      setStatus('loading', '<span class="spinner">⏳</span> Contactpersoon aanmaken...');
+      let personId = null;
+      const personSearch = await apiGet('/persons/search?term=' + encodeURIComponent(volledigeNaam) + '&exact_match=false&limit=5');
+      const existingPerson = personSearch.data?.items?.find(i =>
+        i.item.organization && i.item.organization.id === orgId
+      );
+      if (existingPerson) {
+        personId = existingPerson.item.id;
+      } else {
+        const personBody = { name: volledigeNaam, org_id: orgId, owner_id: ownerId };
+        if (telefoon) personBody.phone = [{ value: telefoon, primary: true }];
+        if (email)    personBody.email = [{ value: email, primary: true }];
+        const personCreate = await apiPost('/persons', personBody);
+        personId = personCreate.data.id;
+      }
+
+      // 3. Deal aanmaken
+      setStatus('loading', '<span class="spinner">⏳</span> Deal aanmaken in Brandfirm Sales...');
+      const dealTitle = volledigeNaam + ' — ' + bedrijf;
+      const dealBody = {
+        title:       dealTitle,
+        org_id:      orgId,
+        person_id:   personId,
+        pipeline_id: PIPELINE_ID,
+        stage_id:    STAGE_ID,
+        user_id:     ownerId,
+      };
+      dealBody[BRON_FIELD] = BRON_VALUE;
+      const dealCreate = await apiPost('/deals', dealBody);
+      const dealId = dealCreate.data.id;
+
+      // 4. Kennismaking activiteit + gespreksverslag als opmerking
+      setStatus('loading', '<span class="spinner">⏳</span> Kennismaking inplannen voor ' + ownerName + '...');
+      await apiPost('/activities', {
+        subject:    'Kennismaking — ' + volledigeNaam + ' (' + bedrijf + ')',
+        type:       ACTIVITY_TYPE,
+        due_date:   datum,
+        due_time:   tijd,
+        duration:   formatDuration(duur),
+        deal_id:    dealId,
+        org_id:     orgId,
+        person_id:  personId,
+        user_id:    ownerId,
+        note:       'Gespreksverslag (' + opdrachtgever + '):\n\n' + verslag,
+      });
+
+      // Succes
+      const dealUrl = 'https://app.pipedrive.com/deal/' + dealId;
+      setStatus('success', `
+        <b>✅ Succesvol ingevoerd in Pipedrive!</b>
+        <ul>
+          <li>Bedrijf: <b>${bedrijf}</b></li>
+          <li>Contactpersoon: <b>${volledigeNaam}</b>${telefoon ? ' · ' + telefoon : ''}${email ? ' · ' + email : ''}</li>
+          <li>Deal: <b>Brandfirm Sales → Kennismaking</b></li>
+          <li>Bron: <b>SalesFusion</b> (automatisch)</li>
+          <li>Eigenaar: <b>${ownerName}</b></li>
+          <li>Kennismaking ingepland op <b>${datum} om ${tijd}</b> (${duur} min) — gespreksverslag als opmerking toegevoegd</li>
+        </ul>
+        <br>
+        <a class="deal-link" href="${dealUrl}" target="_blank">→ Open deal in Pipedrive</a>
+      `);
+
+      // Formulier resetten
+      ['voornaam','achternaam','bedrijf','telefoon','email','datum','verslag'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('tijd').value = '10:00';
+      document.getElementById('duur').value = '60';
+
+    } catch (err) {
+      setStatus('error', '❌ Fout: ' + err.message + '<br><small>Controleer je internetverbinding en probeer opnieuw.</small>');
+    }
+
+    btn.disabled = false;
+  }
+
+  // Init
+  updateOwner();
+</script>
+</body>
+</html>
