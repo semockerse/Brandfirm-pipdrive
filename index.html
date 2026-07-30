@@ -175,6 +175,11 @@
     }
     .btn-secondary:hover { background: #f9fafb; }
 
+    .btn-agenda {
+      background: #1a6b3c;
+    }
+    .btn-agenda:hover { background: #145530; }
+
     .btn-mail {
       padding: 10px 18px;
       background: #1a1a2e;
@@ -400,7 +405,10 @@
       Bron: <strong>SalesFusion</strong>
     </div>
 
-    <button class="btn" id="submitBtn" onclick="doSubmit()">Invoeren in Pipedrive →</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
+      <button class="btn" id="submitBtn" onclick="doSubmit()">Invoeren in Pipedrive →</button>
+      <button class="btn btn-agenda" id="agendaBtn" onclick="openGoogleAgenda()">📅 Afspraak verzenden</button>
+    </div>
     <div class="status" id="status"></div>
 
     <!-- EMAIL PANEL — altijd zichtbaar, live preview -->
@@ -696,6 +704,52 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
     }
 
     btn.disabled = false;
+  }
+
+  // ── Google Agenda afspraak ────────────────────────────────────────
+  function openGoogleAgenda() {
+    const voornaam  = document.getElementById('voornaam').value.trim();
+    const achternaam= document.getElementById('achternaam').value.trim();
+    const bedrijf   = document.getElementById('bedrijf').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const datum     = document.getElementById('datum').value;
+    const tijd      = document.getElementById('tijd').value || '10:00';
+    const duur      = parseInt(document.getElementById('duur').value) || 60;
+    const owner     = getCurrentOwner();
+
+    if (!datum) {
+      alert('Vul eerst een datum in.');
+      return;
+    }
+
+    const volledigeNaam = [voornaam, achternaam].filter(Boolean).join(' ') || 'Prospect';
+
+    // Start en eindtijd berekenen
+    const [uur, min] = tijd.split(':').map(Number);
+    const start = new Date(datum + 'T' + tijd + ':00');
+    const eind  = new Date(start.getTime() + duur * 60000);
+
+    function toGcalDate(d) {
+      return d.getFullYear()
+        + String(d.getMonth()+1).padStart(2,'0')
+        + String(d.getDate()).padStart(2,'0')
+        + 'T'
+        + String(d.getHours()).padStart(2,'0')
+        + String(d.getMinutes()).padStart(2,'0')
+        + '00';
+    }
+
+    const titel       = `Kennismaking ${bedrijf} // Brandfirm`;
+    const beschrijving= `Kennismaking met ${volledigeNaam} van ${bedrijf}.\nIngepland via Salesfusion voor ${owner.name}.`;
+    const gasten      = [email, owner.name.toLowerCase().replace(/ /g,'') + '@brandfirm.nl'].filter(Boolean);
+
+    const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text='    + encodeURIComponent(titel)
+      + '&dates='   + toGcalDate(start) + '/' + toGcalDate(eind)
+      + '&details=' + encodeURIComponent(beschrijving)
+      + (email ? '&add=' + encodeURIComponent(email) : '');
+
+    window.open(url, '_blank');
   }
 
   // ── Live email preview ────────────────────────────────────────────
