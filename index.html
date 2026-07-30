@@ -422,7 +422,6 @@
         <textarea class="email-textarea" id="emailTekst"></textarea>
         <div class="email-actions">
           <button class="btn-secondary" onclick="kopieerMail()">📋 Kopieer tekst</button>
-          <button class="btn-mail" onclick="openMailto()">✉️ Open in e-mailprogramma</button>
         </div>
         <div class="copy-feedback" id="copyFeedback">✅ Gekopieerd!</div>
       </div>
@@ -450,6 +449,7 @@
         name: 'Joren Lammertink',
         initials: 'JL',
         color: '#6366f1',
+        email: 'j.lammertink@brandfirm.nl',
         calUrl: 'https://calendar.google.com/calendar/embed?src=j.lammertink%40brandfirm.nl&ctz=Europe%2FAmsterdam&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0',
       },
       {
@@ -457,6 +457,7 @@
         name: 'Remco van der Boon',
         initials: 'RB',
         color: '#0ea5e9',
+        email: 'r.vanderboon@brandfirm.nl',
         calUrl: 'https://calendar.google.com/calendar/embed?src=r.vanderboon%40brandfirm.nl&ctz=Europe%2FBrussels&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0',
       },
     ],
@@ -466,6 +467,7 @@
         name: 'Bas Doodeman',
         initials: 'BD',
         color: '#10b981',
+        email: 'b.doodeman@brandfirm.nl',
         calUrl: 'https://calendar.google.com/calendar/embed?src=b.doodeman%40brandfirm.nl&ctz=Europe%2FBrussels&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0',
       },
     ],
@@ -739,15 +741,15 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
         + '00';
     }
 
-    const titel       = `Kennismaking ${bedrijf} // Brandfirm`;
-    const beschrijving= `Kennismaking met ${volledigeNaam} van ${bedrijf}.\nIngepland via Salesfusion voor ${owner.name}.`;
-    const gasten      = [email, owner.name.toLowerCase().replace(/ /g,'') + '@brandfirm.nl'].filter(Boolean);
+    const titel        = `Kennismaking ${bedrijf} // Brandfirm`;
+    const mailTekst    = document.getElementById('emailTekst').value;
+    const gasten       = [email, owner.email].filter(Boolean);
 
-    const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    let url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
       + '&text='    + encodeURIComponent(titel)
       + '&dates='   + toGcalDate(start) + '/' + toGcalDate(eind)
-      + '&details=' + encodeURIComponent(beschrijving)
-      + (email ? '&add=' + encodeURIComponent(email) : '');
+      + '&details=' + encodeURIComponent(mailTekst);
+    gasten.forEach(g => { url += '&add=' + encodeURIComponent(g); });
 
     window.open(url, '_blank');
   }
