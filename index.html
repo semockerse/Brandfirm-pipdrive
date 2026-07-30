@@ -228,12 +228,12 @@
     .email-meta span { font-weight: 600; }
     .email-textarea {
       width: 100%;
-      min-height: 200px;
-      padding: 12px;
+      min-height: 320px;
+      padding: 14px;
       border: 1.5px solid #e5e7eb;
       border-radius: 8px;
-      font-size: 13.5px;
-      line-height: 1.7;
+      font-size: 14px;
+      line-height: 1.8;
       color: #111827;
       font-family: inherit;
       resize: vertical;
@@ -403,9 +403,9 @@
     <button class="btn" id="submitBtn" onclick="doSubmit()">Invoeren in Pipedrive →</button>
     <div class="status" id="status"></div>
 
-    <!-- EMAIL PANEL -->
-    <div class="email-panel" id="emailPanel">
-      <div class="email-header">✉️ Bevestigingsmail — pas aan indien nodig en verstuur</div>
+    <!-- EMAIL PANEL — altijd zichtbaar, live preview -->
+    <div class="email-panel" id="emailPanel" style="display:block; margin-top:24px;">
+      <div class="email-header">✉️ Bevestigingsmail — pas aan en verstuur na het invoeren</div>
       <div class="email-body">
         <div class="email-meta">
           <div>Aan: <span id="emailAan">—</span></div>
@@ -698,8 +698,30 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
     btn.disabled = false;
   }
 
+  // ── Live email preview ────────────────────────────────────────────
+  function updateEmailPreview() {
+    const voornaam = document.getElementById('voornaam').value.trim() || 'Naam';
+    const bedrijf  = document.getElementById('bedrijf').value.trim() || 'Bedrijfsnaam';
+    const email    = document.getElementById('email').value.trim();
+    const datum    = document.getElementById('datum').value;
+    const tijd     = document.getElementById('tijd').value || '10:00';
+    const noot     = document.getElementById('persoonlijkeNoot').value.trim();
+    const datumNL  = datum ? formatDatumNL(datum, tijd) : 'datum en tijd';
+
+    document.getElementById('emailAan').textContent       = email || '(nog geen e-mail ingevuld)';
+    document.getElementById('emailOnderwerp').textContent = `Kennismaking ${bedrijf} // Brandfirm`;
+    document.getElementById('emailTekst').value           = buildEmailTekst(voornaam, bedrijf, datumNL, noot);
+  }
+
+  // Koppel live preview aan alle relevante velden
+  ['voornaam','bedrijf','email','datum','tijd','persoonlijkeNoot'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateEmailPreview);
+    document.getElementById(id).addEventListener('change', updateEmailPreview);
+  });
+
   // Init
   updateOwner();
+  updateEmailPreview();
 </script>
 </body>
 </html>
