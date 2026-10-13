@@ -175,24 +175,6 @@
     }
     .btn-secondary:hover { background: #f9fafb; }
 
-    .btn-agenda {
-      background: #1a6b3c;
-    }
-    .btn-agenda:hover { background: #145530; }
-
-    .btn-mail {
-      padding: 10px 18px;
-      background: #1a1a2e;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-mail:hover { background: #2d2d4e; }
-
     .status {
       margin-top: 18px;
       border-radius: 8px;
@@ -207,58 +189,6 @@
     .status ul { margin-top: 8px; padding-left: 18px; }
     .status li { margin-bottom: 3px; }
     a.deal-link { color: #166534; font-weight: 700; text-decoration: underline; }
-
-    /* Email panel */
-    .email-panel {
-      display: none;
-      margin-top: 20px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .email-header {
-      background: #1a1a2e;
-      padding: 12px 16px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .email-body { padding: 16px; }
-    .email-meta {
-      font-size: 13px;
-      color: #374151;
-      margin-bottom: 12px;
-      line-height: 1.8;
-    }
-    .email-meta span { font-weight: 600; }
-    .email-textarea {
-      width: 100%;
-      min-height: 320px;
-      padding: 14px;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      line-height: 1.8;
-      color: #111827;
-      font-family: inherit;
-      resize: vertical;
-    }
-    .email-textarea:focus {
-      outline: none;
-      border-color: #e84c3d;
-      box-shadow: 0 0 0 3px rgba(232,76,61,0.10);
-    }
-    .email-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .copy-feedback {
-      font-size: 12px;
-      color: #166534;
-      margin-top: 6px;
-      display: none;
-    }
 
     .spinner { display: inline-block; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -392,12 +322,6 @@
 
     <hr class="divider" />
 
-    <!-- PERSOONLIJKE NOOT -->
-    <div class="section-label">Persoonlijke noot voor bevestigingsmail <span style="font-weight:400;text-transform:none;font-size:11px;color:#9ca3af">(optioneel)</span></div>
-    <div class="field">
-      <textarea id="persoonlijkeNoot" rows="2" placeholder="Bijv: Ik zag dat jullie recent een nieuwe campagne hebben gelanceerd, daar kunnen we het ook over hebben."></textarea>
-    </div>
-
     <div class="auto-info">
       🤖 <strong>Automatisch ingesteld:</strong>
       Pijplijn: <strong>Brandfirm Sales</strong> &nbsp;·&nbsp;
@@ -405,27 +329,8 @@
       Bron: <strong>SalesFusion</strong>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
-      <button class="btn" id="submitBtn" onclick="doSubmit()">Invoeren in Pipedrive →</button>
-      <button class="btn btn-agenda" id="agendaBtn" onclick="openGoogleAgenda()">📅 Afspraak verzenden</button>
-    </div>
+    <button class="btn" id="submitBtn" onclick="doSubmit()" style="margin-top:6px;">Invoeren in Pipedrive →</button>
     <div class="status" id="status"></div>
-
-    <!-- EMAIL PANEL — altijd zichtbaar, live preview -->
-    <div class="email-panel" id="emailPanel" style="display:block; margin-top:24px;">
-      <div class="email-header">✉️ Bevestigingsmail — pas aan en verstuur na het invoeren</div>
-      <div class="email-body">
-        <div class="email-meta">
-          <div>Aan: <span id="emailAan">—</span></div>
-          <div>Onderwerp: <span id="emailOnderwerp">—</span></div>
-        </div>
-        <textarea class="email-textarea" id="emailTekst"></textarea>
-        <div class="email-actions">
-          <button class="btn-secondary" onclick="kopieerMail()">📋 Kopieer tekst</button>
-        </div>
-        <div class="copy-feedback" id="copyFeedback">✅ Gekopieerd!</div>
-      </div>
-    </div>
 
   </div>
 </div>
@@ -472,6 +377,15 @@
       },
     ],
   };
+
+  // ── Tijdzone helper: lokale tijd → UTC voor Pipedrive ─────────────
+  // Pipedrive slaat due_time op als UTC maar converteert naar accounttijdzone
+  // (Europe/Amsterdam = UTC+1 in winter, UTC+2 in zomer).
+  // We sturen UTC zodat Pipedrive de juiste lokale tijd toont.
+  function tijdNaarUtc(dateStr, timeStr) {
+    const d = new Date(dateStr + 'T' + timeStr + ':00');
+    return String(d.getUTCHours()).padStart(2,'0') + ':' + String(d.getUTCMinutes()).padStart(2,'0');
+  }
 
   // ── Datum helpers ─────────────────────────────────────────────────
   function formatDatumNL(dateStr, tijdStr) {
@@ -530,46 +444,6 @@
     }
   }
 
-  // ── Email helpers ─────────────────────────────────────────────────
-  function buildEmailTekst(voornaam, bedrijf, datumNL, noot) {
-    const nootRegel = noot ? `\n${noot}\n` : '';
-    return `Hi ${voornaam},
-
-Bedankt voor het prettige contact.
-Hierbij bevestig ik onze afspraak op ${datumNL}.
-Tijdens deze kennismaking gaan we samen kijken naar de huidige marketingaanpak en onderzoeken we waar er kansen liggen om de marketing verder te versterken.${nootRegel}
-Zou je deze uitnodiging willen accepteren? Dan weten we allebei zeker dat de afspraak goed in de agenda staat.
-Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
-  }
-
-  function toonEmailPanel(voornaam, bedrijf, email, datumNL, noot) {
-    const onderwerp = `Kennismaking ${bedrijf} // Brandfirm`;
-    const tekst     = buildEmailTekst(voornaam, bedrijf, datumNL, noot);
-
-    document.getElementById('emailAan').textContent      = email || '(geen e-mail ingevuld)';
-    document.getElementById('emailOnderwerp').textContent = onderwerp;
-    document.getElementById('emailTekst').value           = tekst;
-    document.getElementById('emailPanel').style.display   = 'block';
-    document.getElementById('emailPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function kopieerMail() {
-    const tekst = document.getElementById('emailTekst').value;
-    navigator.clipboard.writeText(tekst).then(() => {
-      const fb = document.getElementById('copyFeedback');
-      fb.style.display = 'block';
-      setTimeout(() => { fb.style.display = 'none'; }, 2500);
-    });
-  }
-
-  function openMailto() {
-    const aan      = document.getElementById('emailAan').textContent;
-    const onderwerp = document.getElementById('emailOnderwerp').textContent;
-    const tekst    = document.getElementById('emailTekst').value;
-    const link     = `mailto:${aan}?subject=${encodeURIComponent(onderwerp)}&body=${encodeURIComponent(tekst)}`;
-    window.open(link);
-  }
-
   // ── Status ────────────────────────────────────────────────────────
   function setStatus(type, html) {
     const el = document.getElementById('status');
@@ -604,7 +478,6 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
     const tijd      = document.getElementById('tijd').value;
     const duur      = parseInt(document.getElementById('duur').value) || 60;
     const verslag   = document.getElementById('verslag').value.trim();
-    const noot      = document.getElementById('persoonlijkeNoot').value.trim();
     const opdrachtgeverLabel = document.getElementById('opdrachtgever').options[document.getElementById('opdrachtgever').selectedIndex].text;
     const owner     = getCurrentOwner();
 
@@ -617,7 +490,6 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
     const datumNL       = formatDatumNL(datum, tijd);
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    document.getElementById('emailPanel').style.display = 'none';
 
     try {
       // 1. Organisatie
@@ -651,7 +523,7 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
       // 3. Deal
       setStatus('loading', '<span class="spinner">⏳</span> Deal aanmaken in Brandfirm Sales...');
       const dealBody = {
-        title:       volledigeNaam + ' — ' + bedrijf,
+        title:       bedrijf,
         org_id:      orgId,
         person_id:   personId,
         pipeline_id: PIPELINE_ID,
@@ -668,7 +540,7 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
         subject:   'Kennismaking — ' + volledigeNaam + ' (' + bedrijf + ')',
         type:      ACTIVITY_TYPE,
         due_date:  datum,
-        due_time:  tijd,
+        due_time:  tijdNaarUtc(datum, tijd),
         duration:  formatDuration(duur),
         deal_id:   dealId,
         org_id:    orgId,
@@ -691,11 +563,8 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
         <br><a class="deal-link" href="${dealUrl}" target="_blank">→ Open deal in Pipedrive</a>
       `);
 
-      // Email panel tonen
-      toonEmailPanel(voornaam, bedrijf, email, datumNL, noot);
-
       // Formulier resetten
-      ['voornaam','achternaam','bedrijf','telefoon','email','datum','verslag','persoonlijkeNoot'].forEach(id => {
+      ['voornaam','achternaam','bedrijf','telefoon','email','datum','verslag'].forEach(id => {
         document.getElementById(id).value = '';
       });
       document.getElementById('tijd').value = '10:00';
@@ -708,76 +577,8 @@ Mochten er vooraf nog vragen zijn, laat het gerust weten.`;
     btn.disabled = false;
   }
 
-  // ── Google Agenda afspraak ────────────────────────────────────────
-  function openGoogleAgenda() {
-    const voornaam  = document.getElementById('voornaam').value.trim();
-    const achternaam= document.getElementById('achternaam').value.trim();
-    const bedrijf   = document.getElementById('bedrijf').value.trim();
-    const email     = document.getElementById('email').value.trim();
-    const datum     = document.getElementById('datum').value;
-    const tijd      = document.getElementById('tijd').value || '10:00';
-    const duur      = parseInt(document.getElementById('duur').value) || 60;
-    const owner     = getCurrentOwner();
-
-    if (!datum) {
-      alert('Vul eerst een datum in.');
-      return;
-    }
-
-    const volledigeNaam = [voornaam, achternaam].filter(Boolean).join(' ') || 'Prospect';
-
-    // Start en eindtijd berekenen
-    const [uur, min] = tijd.split(':').map(Number);
-    const start = new Date(datum + 'T' + tijd + ':00');
-    const eind  = new Date(start.getTime() + duur * 60000);
-
-    function toGcalDate(d) {
-      return d.getFullYear()
-        + String(d.getMonth()+1).padStart(2,'0')
-        + String(d.getDate()).padStart(2,'0')
-        + 'T'
-        + String(d.getHours()).padStart(2,'0')
-        + String(d.getMinutes()).padStart(2,'0')
-        + '00';
-    }
-
-    const titel        = `Kennismaking ${bedrijf} // Brandfirm`;
-    const mailTekst    = document.getElementById('emailTekst').value;
-    const gasten       = [email, owner.email].filter(Boolean);
-
-    let url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-      + '&text='    + encodeURIComponent(titel)
-      + '&dates='   + toGcalDate(start) + '/' + toGcalDate(eind)
-      + '&details=' + encodeURIComponent(mailTekst);
-    gasten.forEach(g => { url += '&add=' + encodeURIComponent(g); });
-
-    window.open(url, '_blank');
-  }
-
-  // ── Live email preview ────────────────────────────────────────────
-  function updateEmailPreview() {
-    const voornaam = document.getElementById('voornaam').value.trim() || 'Naam';
-    const bedrijf  = document.getElementById('bedrijf').value.trim() || 'Bedrijfsnaam';
-    const email    = document.getElementById('email').value.trim();
-    const datum    = document.getElementById('datum').value;
-    const tijd     = document.getElementById('tijd').value || '10:00';
-    const noot     = document.getElementById('persoonlijkeNoot').value.trim();
-    const datumNL  = datum ? formatDatumNL(datum, tijd) : 'datum en tijd';
-
-    document.getElementById('emailAan').textContent       = email || '(nog geen e-mail ingevuld)';
-    document.getElementById('emailOnderwerp').textContent = `Kennismaking ${bedrijf} // Brandfirm`;
-    document.getElementById('emailTekst').value           = buildEmailTekst(voornaam, bedrijf, datumNL, noot);
-  }
-
-  // Koppel live preview aan alle relevante velden
-  ['voornaam','bedrijf','email','datum','tijd','persoonlijkeNoot'].forEach(id => {
-    document.getElementById(id).addEventListener('input', updateEmailPreview);
-    document.getElementById(id).addEventListener('change', updateEmailPreview);
-  });
-
   // Init
   updateOwner();
-  updateEmailPreview();
 </script>
 </body>
 </html>
